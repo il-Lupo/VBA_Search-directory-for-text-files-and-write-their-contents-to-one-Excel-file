@@ -1,0 +1,53 @@
+Option Explicit
+
+Public Function Path_Exists(Path As String) As Boolean
+   If Dir(Path, vbDirectory) = vbNullString Then
+      Path_Exists = False
+   Else
+      Path_Exists = True
+   End If
+End Function
+
+
+Sub Main()
+   If Not Path_Exists("C:\Users\Birger\source\repos\VB.NET\Write text file for VBA project") Then
+      MsgBox ("""C:\Users\Birger\source\repos\VB.NET\Write text file for VBA project"" existiert nicht.")
+      Exit Sub
+   End If
+   
+   Range("A1").Value = " "
+   Range("A2").Value = "Nettos"
+   Range("A3").Value = "DSL"
+   Range("A4").Value = "Mobile"
+   
+   Dim LastRow, LastColumn As Integer
+   
+   Dim MainFolder As Object, File As Object
+   Set MainFolder = CreateObject("Scripting.FileSystemObject").GetFolder("C:\Users\Birger\source\repos\VB.NET\Write text file for VBA project")
+   Dim i As Integer
+   i = 0
+   For Each File In MainFolder.Files
+      Dim extension As String
+      extension = LCase(Mid$(File, InStrRev(File, ".")))
+      If extension = ".txt" Then
+          Dim FSO As Object
+          Set FSO = CreateObject("Scripting.FileSystemObject")
+          Dim Arr As Variant
+          Dim MyFile As Object
+          Set MyFile = FSO.OpenTextFile(File.Path, 1)
+          Arr = Split(MyFile.ReadAll, vbNewLine)
+          
+          Range(Cells(1, i + 2), Cells(1, i + 2)).Value = Arr(0) & " " & Arr(1)
+          LastColumn = i + 2
+          
+          Dim j As Integer
+          For j = 2 To UBound(Arr) - 1 Step 1
+              Range(Cells(j, i + 2), Cells(j, i + 2)).Value = Arr(j)
+              LastRow = j
+          Next j
+      End If
+      i = i + 1
+   Next File
+   
+   Range(Cells(1, 1), Cells(LastRow, LastColumn)).EntireColumn.AutoFit
+End Sub
